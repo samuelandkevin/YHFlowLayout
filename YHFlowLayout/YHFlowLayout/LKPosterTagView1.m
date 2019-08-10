@@ -10,12 +10,9 @@
 
 @interface LKPosterTagView1()
 @property(nonatomic,copy) NSArray *dataArray;
-@property(nonatomic,copy) NSArray *colorsArray; //tag背景颜色
-@property(nonatomic,copy) NSArray *textColorsArray;//tag文本颜色
-@property(nonatomic,strong) NSMutableDictionary *dicTags;
 @property(nonatomic,assign) CGFloat tagConWidth;//标签容器的宽度
 @property(nonatomic,copy) NSMutableArray *frameArray;//标签的frame数组
-@property(nonatomic,strong) NSMutableDictionary *dictWidthInRow;//记录每行标签的总宽度
+@property(nonatomic,strong)NSMutableDictionary *dictWidthInRow;//记录每行标签的总宽度
 @end
 
 @implementation LKPosterTagView1
@@ -57,6 +54,7 @@
     }
     
     
+    
     [self layoutUI];
 }
 
@@ -73,65 +71,11 @@
     return _frameArray;
 }
 
+#pragma mark - Public
 
-- (CGFloat)getHeightWithDictTags:(NSMutableDictionary *)dicTags posterType:(PosterType)posterType{
-    _dicTags = dicTags;
-    
-    NSMutableArray *totalArr = [NSMutableArray new];
-    NSMutableArray *totalColorArr = [NSMutableArray new];
-    NSMutableArray *totalTextColorArr = [NSMutableArray new];
-    
-    
-    NSArray *arr1 = _dicTags[@"key1"];
-    
-    UIColor *color1 = LO_COLOR_WITH_HEX(0x1C82FF);
-    UIColor *color2 = LO_COLOR_WITH_HEX(0xFF6F21);
-    UIColor *otherCol = LO_COLOR_WITH_HEX(0xF6F6F6);
-    
-    UIColor *textCol = LO_COLOR_WITH_HEX(0xFFFFFF);
-    UIColor *otherTextCol = LO_COLOR_WITH_HEX(0x333333);
-    
-    if (posterType == PosterType2) {
-        color1 = LO_COLOR_WITH_HEX(0x1C82FF);
-        color2 = LO_COLOR_WITH_HEX(0xFFA92E);
-        otherCol = LO_COLOR_WITH_HEX(0xF6F6F6);
-        
-        textCol = LO_COLOR_WITH_HEX(0xFFFFFF);
-        otherTextCol = LO_COLOR_WITH_HEX(0x00275C);
-    }
-    
-    
-    if (arr1.count) {
-        [totalArr addObjectsFromArray:arr1];
-        [totalColorArr addObject:color1];
-        [totalTextColorArr addObject:textCol];
-    }
-    
-    NSArray *arr2 = _dicTags[@"key2"];
-    
-    if (arr2.count) {
-        [totalArr addObjectsFromArray:arr2];
-        [totalColorArr addObject:color2];
-        [totalTextColorArr addObject:textCol];
-    }
-    
-    
-    NSArray *arr3 = _dicTags[@"key3"];
-    if (arr3.count) {
-        [totalArr addObjectsFromArray:arr3];
-        for (int i=0; i<arr3.count; i++) {
-            [totalColorArr addObject:otherCol];
-            [totalTextColorArr addObject:otherTextCol];
-        }
-    }
-    
-    self.dataArray = [totalArr copy];
-    self.colorsArray = [totalColorArr copy];
-    self.textColorsArray = [totalTextColorArr copy];
-    
+- (CGFloat)getHeightWithDataArray:(NSArray<NSString *>*)array{
+    self.dataArray   = array;
     [self.frameArray removeAllObjects];
-    
-    
     return [self setupTagsAndGetHeight];
 }
 
@@ -157,12 +101,12 @@
         lb.tag      = 1000 + i;
         lb.font     = self.font;
         
-        lb.textColor       = self.textColorsArray[i];
-        lb.backgroundColor = self.colorsArray[i];
+        lb.textColor       = self.tagTextColor;
+        lb.backgroundColor = self.tagColor;
         lb.text      = str;
         lb.autoresizingMask = UIViewAutoresizingFlexibleRightMargin;
         lb.textAlignment = NSTextAlignmentCenter;
-        lb.layer.cornerRadius   = 12;
+        lb.layer.cornerRadius   = self.tagHeight/2;
         lb.layer.masksToBounds  = YES;
         [self addSubview:lb];
         
@@ -237,7 +181,7 @@
     
     [self.dataArray enumerateObjectsUsingBlock:^(NSString*str, NSUInteger idx, BOOL *stop) {
         LOStrongify(self);
-        UILabel *lb = [self viewWithTag:1000+idx];
+        UILabel *lb       = [self viewWithTag:1000+idx];
         NSString *rectStr = self.frameArray[idx];
         [lb setFrame:CGRectFromString(rectStr)];
     }];
